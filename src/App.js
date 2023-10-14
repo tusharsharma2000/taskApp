@@ -16,7 +16,7 @@ function App() {
       // setWonttasks();
       setCouldTasks(response.data[1]);
       setMustTasks(response.data[2]);
-      console.log(response.data[0].tasks);
+      // console.log(response.data[0].tasks);
     });
   };
 
@@ -25,9 +25,9 @@ function App() {
   }, []);
 
   const [task, setTask] = useState({
+    id:"",
     title: "",
-    description: "",
-    id:""
+    description: ""
   });
 
   const handleInputChange = (e) => {
@@ -40,10 +40,14 @@ function App() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    task.id = new Date().getTime();
-    // console.log(wontTasks);
-    // setWonttasks([...wontTasks.tasks]);
-    // console.log(wontTasks);
+    task.id = String(new Date().getTime());
+    const cpData = wontTasks;
+    cpData.tasks.push(task);
+    setWonttasks(cpData);
+    setTask({
+      id:"",
+      title: "",
+      description: "",});
   };
 
   return (
@@ -99,7 +103,7 @@ function App() {
         <div className="board__columns grid grid-cols-3 gap-3 py-4">
           <div className="column bg-[#6a5acd] text-white p-1 ">
             <h2 className="column__title text-2xl p-1 font-bold">
-              Won't haves
+              {wontTasks.title}
             </h2>
             <div className="column__cards p-3 border-gray-950">
               {wontTasks["tasks"] &&
@@ -117,7 +121,7 @@ function App() {
 
           <div className="column bg-[#6a5acd] text-white p-1 ">
             <h2 className="column__title text-2xl p-1 font-bold">
-              Could haves
+              {couldTasks.title}
             </h2>
             <div className="column__cards p-3 border-gray-950">
               {couldTasks["tasks"] &&
@@ -134,7 +138,9 @@ function App() {
           </div>
 
           <div className="column bg-[#6a5acd] text-white p-1 ">
-            <h2 className="column__title text-2xl p-1 font-bold">Must haves</h2>
+            <h2 className="column__title text-2xl p-1 font-bold">
+              {mustTasks.title}
+            </h2>
             <div className="column__cards p-3 border-gray-950">
               {mustTasks["tasks"] &&
                 mustTasks["tasks"].map((task, index) => (
