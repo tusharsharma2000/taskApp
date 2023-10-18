@@ -1,61 +1,59 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { TaskCard } from "./components/taskCard.jsx";
-import { AddTask } from "./components/AddTask.jsx";
+import { AddTask } from "./components/addTask.jsx";
 import axios from "axios";
 import { TaskList } from "./components/taskList.jsx";
 
 function App() {
   const [wontTasks, setWonttasks] = useState([]);
-  const [data, setData] = useState([]);
   const [couldTasks, setCouldTasks] = useState([]);
   const [mustTasks, setMustTasks] = useState([]);
 
-  let taskId;
-  const url = "https://run.mocky.io/v3/b755e0f3-8ce7-438d-a9d0-63b97bea9808";
+  // const url = "https://run.mocky.io/v3/b755e0f3-8ce7-438d-a9d0-63b97bea9808";
   const url2 =
     "https://api-regional.codesignalcontent.com/task-management-system-2/backlog";
 
+  let list = {};
+
   const fetchInfo = (taskId) => {
-    // console.log(taskId);
-    // const url = `https://api-regional.codesignalcontent.com/task-management-system-2/tasks/${taskId}`;
+    const url = `https://api-regional.codesignalcontent.com/task-management-system-2/tasks/${taskId}`;
 
-    return axios.get(url).then((res, err) => {
-      // if (res) {
-      //   // console.log(res.data)
-      //   let myData =data;
-
-      //   myData.push(res.data);
-      //   setData(myData);
-      //   console.log(data);
-      // }
-      setWonttasks(res.data[0]);
-      setCouldTasks(res.data[1]);
-      setMustTasks(res.data[2]);
-      // console.log(response.data[0].tasks);
-    });
+    return axios
+      .get(url)
+      .then((res) => res.data)
+      .catch((error) => {
+        console.log(error);
+        return null;
+      });
   };
 
   const fetchInfo2 = () => {
-    return axios.get(url2).then((res, error) => {
-      // console.log(res.data[0].tasks);
-      res.data.map((item) =>
-        // console.log(item.tasks)
-        item.tasks.map(
-          (task) =>
-            // taskId = task
-            fetchInfo(task)
-          // console.log(task)
-        )
-      );
-      // console.log(data);
-    });
+    return axios.get(url2).then((res) => res.data);
   };
 
   useEffect(() => {
-    fetchInfo();
-    // fetchInfo2();
+    const fetchData = async () => {
+      const data2 = await fetchInfo2();
+      if (data2) {
+        for (const item of data2) {
+          const title = item.title;
+          const taskData = await Promise.all(
+            item.tasks.map((task) => fetchInfo(task))
+          );
+          const listCopy = { ...list };
+          listCopy[title] = taskData.filter(Boolean); // Filter out any null data
+          list = listCopy;
+        }
+      }
+      setWonttasks(list["Won't haves"]);
+      setCouldTasks(list["Could haves"]);
+      setMustTasks(list["Must haves"]);
+    };
+
+    fetchData();
   }, []);
+
 
   const [task, setTask] = useState({
     id: "",
@@ -74,8 +72,8 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
     task.id = String(new Date().getTime());
-    const cpData = wontTasks;
-    cpData.tasks.push(task);
+    const cpData = [...wontTasks];
+    cpData.push(task);
     setWonttasks(cpData);
     setTask({
       id: "",
@@ -85,7 +83,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="App bg-[#9e91e7] pt-4">
       <AddTask
         task={task}
         handleInputChange={handleInputChange}
@@ -97,9 +95,9 @@ function App() {
           Tasks
         </h2>
         <div className="board__columns grid grid-cols-3 gap-3 py-4">
-          <TaskList wontTasks={wontTasks}/>
-          <TaskList wontTasks={couldTasks}/>
-          <TaskList wontTasks={mustTasks}/>
+          <TaskList tasks={wontTasks} title="Won't Task" />
+          <TaskList tasks={couldTasks} title="Could Task" />
+          <TaskList tasks={mustTasks} title="Must Task" />
         </div>
       </div>
     </div>

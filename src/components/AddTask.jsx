@@ -21,6 +21,7 @@ export const AddTask = ({ task, handleInputChange, handleSubmit }) => {
           value={task.title}
           onChange={handleInputChange}
           className="w-full border border-gray-300 rounded py-2 px-3 focus:outline-none focus:border-blue-500"
+          required
         />
       </div>
       <div className="mb-4">
@@ -34,6 +35,8 @@ export const AddTask = ({ task, handleInputChange, handleSubmit }) => {
           value={task.description}
           onChange={handleInputChange}
           className="w-full border border-gray-300 rounded py-2 px-3 focus:outline-none focus:border-blue-500"
+          required
+          autoComplete="off"
         />
       </div>
       <button
